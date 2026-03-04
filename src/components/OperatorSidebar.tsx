@@ -1,4 +1,4 @@
-import { PlusCircle, Radio, FileText, Users, BarChart3, Settings } from "lucide-react";
+import { PlusCircle, Radio, FileText, Users, BarChart3, Settings, Clock } from "lucide-react";
 
 interface OperatorSidebarProps {
   activeItem: string;
@@ -8,6 +8,7 @@ interface OperatorSidebarProps {
 const menuItems = [
   { id: "nuova", label: "Nuova comunicazione AI", icon: PlusCircle },
   { id: "attive", label: "Comunicazioni attive", icon: Radio },
+  { id: "recenti", label: "Comunicazioni recenti", icon: Clock },
   { id: "template", label: "Template salvati", icon: FileText },
   { id: "segmenti", label: "Segmenti audience", icon: Users },
   { id: "statistiche", label: "Statistiche", icon: BarChart3 },

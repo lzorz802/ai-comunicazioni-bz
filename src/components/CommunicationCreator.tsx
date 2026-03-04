@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Calendar, Send, Edit3, Save, BarChart3, Mail, Smartphone, MessageSquare, Users, Eye } from "lucide-react";
-import AiAssistantPanel from "./AiAssistantPanel";
+import { useToast } from "@/hooks/use-toast";
 
 const defaultSegments = [
   { label: "Agenzie immobiliari e operatori settore immobiliare", count: 247, selected: true },
@@ -41,8 +41,11 @@ const CommunicationCreator = () => {
   const [previewSubject, setPreviewSubject] = useState(defaultPreview.subject);
   const [previewBody, setPreviewBody] = useState(defaultPreview.body);
   const [step, setStep] = useState(1);
+  const { toast } = useToast();
 
   const totalRecipients = segments.filter(s => s.selected).reduce((sum, s) => sum + s.count, 0);
+
+  const channelLabel = channel === "email" ? "Email" : channel === "push" ? "Push" : "SMS";
 
   const handleTypeSelect = (val: string) => {
     setCommType(val);
@@ -53,170 +56,162 @@ const CommunicationCreator = () => {
     if (commType && userPrompt.trim()) setStep(3);
   };
 
+  const handleSend = () => {
+    const selectedSegments = segments.filter(s => s.selected);
+    toast({
+      title: "✅ Comunicazione inviata con successo!",
+      description: `La comunicazione "${previewSubject}" è stata programmata per il ${new Date(sendDate).toLocaleDateString("it-IT")} tramite ${channelLabel}. Verrà inviata a ${totalRecipients.toLocaleString("it-IT")} destinatari in ${selectedSegments.length} segmenti. Riceverai una conferma via email al completamento dell'invio.`,
+      duration: 8000,
+    });
+  };
+
   return (
-    <div className="flex gap-6 h-full">
-      {/* Main area */}
-      <div className="flex-1 space-y-6">
-        {/* Step 1: Type selection */}
+    <div className="space-y-6">
+      {/* Step 1 */}
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h2 className="text-lg font-bold text-foreground mb-4">1. Tipo di comunicazione</h2>
+        <Select value={commType} onValueChange={handleTypeSelect}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleziona il tipo di comunicazione..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="nuovi-servizi">Comunicazione su nuovi servizi</SelectItem>
+            <SelectItem value="servizi-interesse">Comunicazione su servizi di interesse</SelectItem>
+            <SelectItem value="stato-pratiche">Comunicazione su stato pratiche</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Step 2 */}
+      {commType && (
         <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-bold text-foreground mb-4">1. Tipo di comunicazione</h2>
-          <Select value={commType} onValueChange={handleTypeSelect}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleziona il tipo di comunicazione..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="nuovi-servizi">Comunicazione su nuovi servizi</SelectItem>
-              <SelectItem value="servizi-interesse">Comunicazione su servizi di interesse</SelectItem>
-              <SelectItem value="stato-pratiche">Comunicazione su stato pratiche</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Step 2: AI Input */}
-        {commType && (
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-bold text-foreground mb-4">2. Descrivi la comunicazione</h2>
-            <Textarea
-              value={userPrompt}
-              onChange={(e) => setUserPrompt(e.target.value)}
-              placeholder="Descrivi il servizio o la comunicazione che vuoi inviare..."
-              className="min-h-[100px] mb-3"
-            />
-            <Button variant="cta" onClick={handlePromptSubmit} disabled={!userPrompt.trim()}>
-              <Send className="h-4 w-4" />
-              Genera con AI
-            </Button>
-          </div>
-        )}
-
-        {/* Step 3: Segments */}
-        {step >= 3 && (
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-bold text-foreground mb-4">3. Segmenti target selezionati</h2>
-            <div className="space-y-3">
-              {segments.map((seg, idx) => (
-                <label key={idx} className="flex items-center gap-3 p-3 rounded-md border border-border hover:bg-muted/50 cursor-pointer transition-colors">
-                  <Checkbox
-                    checked={seg.selected}
-                    onCheckedChange={(checked) => {
-                      const updated = [...segments];
-                      updated[idx] = { ...updated[idx], selected: !!checked };
-                      setSegments(updated);
-                    }}
-                  />
-                  <span className="flex-1 text-sm font-medium text-foreground">{seg.label}</span>
-                  <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
-                    n° {seg.count.toLocaleString("it-IT")}
-                  </span>
-                </label>
-              ))}
-            </div>
-            <div className="mt-4 p-3 rounded-md bg-info-bg border border-info/20 flex items-center gap-2">
-              <Users className="h-5 w-5 text-info" />
-              <span className="text-sm font-semibold text-foreground">
-                Totale destinatari: {totalRecipients.toLocaleString("it-IT")} utenti
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Personalizzazione */}
-        {step >= 3 && (
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-bold text-foreground mb-4">4. Personalizzazione</h2>
-            <div className="space-y-4">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox checked={onlyBolzano} onCheckedChange={(c) => setOnlyBolzano(!!c)} />
-                <span className="text-sm text-foreground">Includi solo utenti Provincia Bolzano</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox checked={excludeSimilar} onCheckedChange={(c) => setExcludeSimilar(!!c)} />
-                <span className="text-sm text-foreground">Escludi chi ha già ricevuto comunicazione simile</span>
-              </label>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Data invio</label>
-                  <Input type="date" value={sendDate} onChange={(e) => setSendDate(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Canale</label>
-                  <Select value={channel} onValueChange={setChannel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="email">
-                        <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> Email</span>
-                      </SelectItem>
-                      <SelectItem value="push">
-                        <span className="flex items-center gap-2"><Smartphone className="h-4 w-4" /> Push</span>
-                      </SelectItem>
-                      <SelectItem value="sms">
-                        <span className="flex items-center gap-2"><MessageSquare className="h-4 w-4" /> SMS</span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 5: Preview */}
-        {step >= 3 && (
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              5. Anteprima comunicazione
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">Oggetto</label>
-                <Input value={previewSubject} onChange={(e) => setPreviewSubject(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">Corpo del messaggio</label>
-                <Textarea
-                  value={previewBody}
-                  onChange={(e) => setPreviewBody(e.target.value)}
-                  className="min-h-[200px] font-mono text-sm"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground italic">Testo generato automaticamente dall'AI e modificabile</p>
-
-              <div className="flex items-center gap-2 mt-2">
-                <Button variant="cta" className="gap-2" size="lg">
-                  <Send className="h-4 w-4" /> INVIA COMUNICAZIONE
-                </Button>
-                <Button variant="cta-outline" className="gap-2">
-                  <Edit3 className="h-4 w-4" /> MODIFICA SEGMENTI
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" className="gap-2">
-                  <Save className="h-4 w-4" /> SALVA COME TEMPLATE
-                </Button>
-                <Button variant="outline" className="gap-2">
-                  <BarChart3 className="h-4 w-4" /> ANTEPRIMA STATISTICHE
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* AI Assistant Panel */}
-      <div className="w-80 shrink-0 hidden lg:block">
-        <div className="sticky top-4">
-          <AiAssistantPanel
-            communicationType={commType}
-            userPrompt={step >= 2 ? userPrompt : ""}
-            segments={segments}
-            onSegmentsChange={setSegments}
+          <h2 className="text-lg font-bold text-foreground mb-4">2. Descrivi la comunicazione</h2>
+          <Textarea
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+            placeholder="Descrivi il servizio o la comunicazione che vuoi inviare..."
+            className="min-h-[100px] mb-3"
           />
+          <Button variant="cta" onClick={handlePromptSubmit} disabled={!userPrompt.trim()}>
+            <Send className="h-4 w-4" />
+            Genera con AI
+          </Button>
         </div>
-      </div>
+      )}
+
+      {/* Step 3: Segments */}
+      {step >= 3 && (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4">3. Segmenti target selezionati</h2>
+          <div className="space-y-3">
+            {segments.map((seg, idx) => (
+              <label key={idx} className="flex items-center gap-3 p-3 rounded-md border border-border hover:bg-muted/50 cursor-pointer transition-colors">
+                <Checkbox
+                  checked={seg.selected}
+                  onCheckedChange={(checked) => {
+                    const updated = [...segments];
+                    updated[idx] = { ...updated[idx], selected: !!checked };
+                    setSegments(updated);
+                  }}
+                />
+                <span className="flex-1 text-sm font-medium text-foreground">{seg.label}</span>
+                <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
+                  n° {seg.count.toLocaleString("it-IT")}
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="mt-4 p-3 rounded-md bg-info-bg border border-info/20 flex items-center gap-2">
+            <Users className="h-5 w-5 text-info" />
+            <span className="text-sm font-semibold text-foreground">
+              Totale destinatari: {totalRecipients.toLocaleString("it-IT")} utenti
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Personalizzazione */}
+      {step >= 3 && (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4">4. Personalizzazione</h2>
+          <div className="space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <Checkbox checked={onlyBolzano} onCheckedChange={(c) => setOnlyBolzano(!!c)} />
+              <span className="text-sm text-foreground">Includi solo utenti Provincia Bolzano</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <Checkbox checked={excludeSimilar} onCheckedChange={(c) => setExcludeSimilar(!!c)} />
+              <span className="text-sm text-foreground">Escludi chi ha già ricevuto comunicazione simile</span>
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1.5">Data invio</label>
+                <Input type="date" value={sendDate} onChange={(e) => setSendDate(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1.5">Canale</label>
+                <Select value={channel} onValueChange={setChannel}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">
+                      <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> Email</span>
+                    </SelectItem>
+                    <SelectItem value="push">
+                      <span className="flex items-center gap-2"><Smartphone className="h-4 w-4" /> Push</span>
+                    </SelectItem>
+                    <SelectItem value="sms">
+                      <span className="flex items-center gap-2"><MessageSquare className="h-4 w-4" /> SMS</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 5: Preview */}
+      {step >= 3 && (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <Eye className="h-5 w-5" />
+            5. Anteprima comunicazione
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground block mb-1.5">Oggetto</label>
+              <Input value={previewSubject} onChange={(e) => setPreviewSubject(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground block mb-1.5">Corpo del messaggio</label>
+              <Textarea
+                value={previewBody}
+                onChange={(e) => setPreviewBody(e.target.value)}
+                className="min-h-[200px] font-mono text-sm"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground italic">Testo generato automaticamente dall'AI e modificabile</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Button variant="cta" className="gap-2" size="lg" onClick={handleSend}>
+                <Send className="h-4 w-4" /> INVIA COMUNICAZIONE
+              </Button>
+              <Button variant="cta-outline" className="gap-2">
+                <Edit3 className="h-4 w-4" /> MODIFICA SEGMENTI
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" className="gap-2">
+                <Save className="h-4 w-4" /> SALVA COME TEMPLATE
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <BarChart3 className="h-4 w-4" /> ANTEPRIMA STATISTICHE
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
