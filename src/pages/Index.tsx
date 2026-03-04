@@ -42,7 +42,7 @@ const Index = () => {
             <h1 className="text-2xl font-bold text-foreground">{section.title}</h1>
             <p className="text-sm text-muted-foreground mt-1">{section.subtitle}</p>
           </div>
-          {activeItem === "nuova" && <CommunicationCreator />}
+          {activeItem === "nuova" && <CommunicationCreator onScrollTop={() => mainRef.current?.scrollTo({ top: 0 })} />}
           {activeItem === "attive" && <ActiveCommunications />}
           {activeItem === "template" && <SavedTemplates />}
           {activeItem === "segmenti" && <AudienceSegments />}

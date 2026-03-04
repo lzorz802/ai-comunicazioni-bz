@@ -28,7 +28,7 @@ Cordiali saluti,
 Provincia Autonoma di Bolzano`,
 };
 
-const CommunicationCreator = () => {
+const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => {
   const [commType, setCommType] = useState("");
   const [userPrompt, setUserPrompt] = useState(
     "Vorrei impostare una comunicazione per tutte le persone potenzialmente interessate al nuovo servizio disponibile 'Acquisto di beni immobiliari provinciali'"
@@ -58,12 +58,14 @@ const CommunicationCreator = () => {
 
   const handleSend = () => {
     setSent(true);
+    onScrollTop?.();
   };
 
   const handleBack = () => {
     setSent(false);
     setStep(1);
     setCommType("");
+    onScrollTop?.();
   };
 
   if (sent) {
