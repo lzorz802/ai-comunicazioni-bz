@@ -17,7 +17,7 @@ const menuItems = [
 
 const OperatorSidebar = ({ activeItem, onItemClick }: OperatorSidebarProps) => {
   return (
-    <aside className="w-64 bg-card border-r border-border shrink-0 sticky top-0 h-screen overflow-y-auto">
+    <aside className="w-64 bg-card border-r border-border shrink-0 overflow-y-auto">
       <div className="p-4 border-b border-border">
         <h2 className="text-sm font-bold text-primary tracking-wider uppercase">Menu Operatore</h2>
       </div>
