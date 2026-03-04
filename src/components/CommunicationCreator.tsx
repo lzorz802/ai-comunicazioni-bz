@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Calendar, Send, Edit3, Save, BarChart3, Mail, Smartphone, MessageSquare, Users, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import CommunicationSummary from "@/components/CommunicationSummary";
 
 const defaultSegments = [
   { label: "Agenzie immobiliari e operatori settore immobiliare", count: 247, selected: true },
@@ -41,7 +41,7 @@ const CommunicationCreator = () => {
   const [previewSubject, setPreviewSubject] = useState(defaultPreview.subject);
   const [previewBody, setPreviewBody] = useState(defaultPreview.body);
   const [step, setStep] = useState(1);
-  const { toast } = useToast();
+  const [sent, setSent] = useState(false);
 
   const totalRecipients = segments.filter(s => s.selected).reduce((sum, s) => sum + s.count, 0);
 
@@ -57,13 +57,31 @@ const CommunicationCreator = () => {
   };
 
   const handleSend = () => {
-    const selectedSegments = segments.filter(s => s.selected);
-    toast({
-      title: "✅ Comunicazione inviata con successo!",
-      description: `La comunicazione "${previewSubject}" è stata programmata per il ${new Date(sendDate).toLocaleDateString("it-IT")} tramite ${channelLabel}. Verrà inviata a ${totalRecipients.toLocaleString("it-IT")} destinatari in ${selectedSegments.length} segmenti. Riceverai una conferma via email al completamento dell'invio.`,
-      duration: 8000,
-    });
+    setSent(true);
   };
+
+  const handleBack = () => {
+    setSent(false);
+    setStep(1);
+    setCommType("");
+  };
+
+  if (sent) {
+    return (
+      <CommunicationSummary
+        data={{
+          subject: previewSubject,
+          body: previewBody,
+          channel,
+          sendDate,
+          totalRecipients,
+          segments: segments.filter(s => s.selected),
+          commType,
+        }}
+        onBack={handleBack}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

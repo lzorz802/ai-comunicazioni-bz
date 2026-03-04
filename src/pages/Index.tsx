@@ -28,9 +28,9 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         <OperatorSidebar activeItem={activeItem} onItemClick={setActiveItem} />
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-200px)]">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-foreground">{section.title}</h1>
             <p className="text-sm text-muted-foreground mt-1">{section.subtitle}</p>

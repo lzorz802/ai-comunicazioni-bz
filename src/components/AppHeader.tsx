@@ -2,13 +2,13 @@ import myCivisRosso from "@/assets/my_civis_rosso.png";
 import { Menu, X, User, Bell } from "lucide-react";
 import { useState } from "react";
 
-const navItems = ["Dashboard Operatore", "Statistiche", "Impostazioni"];
+const navItems = ["Dashboard Operatore"];
 
 const AppHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header>
+    <header className="sticky top-0 z-50">
       <div className="bg-primary text-primary-foreground">
         <div className="container mx-auto flex items-center justify-between px-4 md:px-6 py-2 text-sm">
           <span className="font-normal tracking-wide">Provincia Autonoma di Bolzano – Alto Adige</span>
