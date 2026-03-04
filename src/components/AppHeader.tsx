@@ -2,7 +2,7 @@ import myCivisRosso from "@/assets/my_civis_rosso.png";
 import { Menu, X, User, Bell } from "lucide-react";
 import { useState } from "react";
 
-const navItems = ["Dashboard Operatore", "Comunicazioni", "Statistiche", "Impostazioni"];
+const navItems = ["Dashboard Operatore", "Statistiche", "Impostazioni"];
 
 const AppHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,7 +28,7 @@ const AppHeader = () => {
                   key={item}
                   href="#"
                   className={`text-foreground font-semibold text-sm tracking-wide hover:text-primary transition-colors ${
-                    item === "Comunicazioni" ? "text-primary border-b-2 border-primary pb-1" : ""
+                    item === "Dashboard Operatore" ? "text-primary border-b-2 border-primary pb-1" : ""
                   }`}
                 >
                   {item}
