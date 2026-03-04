@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
 import OperatorSidebar from "@/components/OperatorSidebar";
@@ -23,14 +23,21 @@ const sectionTitles: Record<string, { title: string; subtitle: string }> = {
 
 const Index = () => {
   const [activeItem, setActiveItem] = useState("nuova");
+  const mainRef = useRef<HTMLElement>(null);
   const section = sectionTitles[activeItem] || sectionTitles.nuova;
 
+  const handleItemClick = (item: string) => {
+    setActiveItem(item);
+    mainRef.current?.scrollTo({ top: 0 });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <AppHeader />
       <div className="flex flex-1 min-h-0">
-        <OperatorSidebar activeItem={activeItem} onItemClick={setActiveItem} />
-        <main className="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-200px)]">
+        <OperatorSidebar activeItem={activeItem} onItemClick={handleItemClick} />
+        <main ref={mainRef} className="flex-1 overflow-y-auto">
+          <div className="p-6 min-h-[calc(100vh-200px)]">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-foreground">{section.title}</h1>
             <p className="text-sm text-muted-foreground mt-1">{section.subtitle}</p>
@@ -42,9 +49,10 @@ const Index = () => {
           {activeItem === "statistiche" && <StatisticsPage />}
           {activeItem === "impostazioni" && <SettingsPage />}
           {activeItem === "recenti" && <RecentCommunications />}
+          </div>
+          <AppFooter />
         </main>
       </div>
-      <AppFooter />
       <AiAssistantPanel />
     </div>
   );
