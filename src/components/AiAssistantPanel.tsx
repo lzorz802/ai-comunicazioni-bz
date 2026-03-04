@@ -24,15 +24,14 @@ const AiAssistantPanel = () => {
     return (
       <div
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-lg p-4 flex items-center gap-3 cursor-pointer shadow-lg hover:shadow-xl transition-shadow max-w-sm"
-        style={{ borderLeft: "4px solid hsl(var(--ai-purple))" }}
+        className="fixed bottom-6 right-6 z-50 bg-ai-bg rounded-full px-5 py-3 flex items-center gap-3 cursor-pointer shadow-lg hover:shadow-xl transition-shadow"
       >
-        <div className="h-10 w-10 rounded-full bg-ai-bg flex items-center justify-center shrink-0">
+        <div className="h-9 w-9 rounded-full bg-ai/10 flex items-center justify-center shrink-0">
           <Sparkles className="h-5 w-5 text-ai" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground text-sm">Hai dei dubbi?</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-foreground text-sm leading-tight">Hai dei dubbi?</h3>
+          <p className="text-sm text-muted-foreground leading-tight">
             Apri una chat con l'assistente virtuale →
           </p>
         </div>
@@ -41,12 +40,12 @@ const AiAssistantPanel = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-80 h-[28rem] bg-card border border-border rounded-lg shadow-xl flex flex-col overflow-hidden">
+    <div className="fixed bottom-6 right-6 z-50 w-80 h-[28rem] bg-card border border-border rounded-xl shadow-xl flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-ai" />
-          <span className="font-bold text-foreground text-sm">Assistente virtuale</span>
+          <span className="font-bold text-foreground text-base">Assistente virtuale</span>
         </div>
         <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
           <X className="h-5 w-5" />
@@ -81,9 +80,8 @@ const AiAssistantPanel = () => {
         />
         <Button
           size="icon"
-          variant="destructive"
           onClick={handleSend}
-          className="shrink-0 bg-primary hover:bg-primary/90"
+          className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
         >
           <Send className="h-4 w-4" />
         </Button>
