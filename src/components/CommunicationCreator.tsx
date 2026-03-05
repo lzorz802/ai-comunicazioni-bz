@@ -105,7 +105,7 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
 
       // Persist to localStorage for AudienceSegments
       const stored = JSON.parse(localStorage.getItem("newAudienceSegments") || "[]");
-      stored.unshift({ nome: newLabel, utenti: newCount.toLocaleString("it-IT"), categoria: "AI", aggiornato: new Date().toLocaleDateString("it-IT"), isNew: true, createdAt: Date.now() });
+      stored.unshift({ nome: newLabel, utenti: newCount.toLocaleString("it-IT"), categoria: "Cittadini", aggiornato: new Date().toLocaleDateString("it-IT"), createdAt: Date.now() });
       localStorage.setItem("newAudienceSegments", JSON.stringify(stored));
     }, 1200);
   };
