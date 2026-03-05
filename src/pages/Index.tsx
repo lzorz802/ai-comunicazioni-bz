@@ -12,13 +12,13 @@ import SettingsPage from "@/components/SettingsPage";
 import AiAssistantPanel from "@/components/AiAssistantPanel";
 
 const sectionTitles: Record<string, { title: string; subtitle: string }> = {
-  nuova: { title: "Nuova comunicazione AI", subtitle: "Crea e invia comunicazioni automatizzate con supporto dell'Intelligenza Artificiale" },
+  nuova: { title: "Nuova comunicazione", subtitle: "Crea e invia comunicazioni automatizzate con supporto dell'Intelligenza Artificiale" },
   attive: { title: "Comunicazioni attive", subtitle: "Monitora lo stato delle comunicazioni in corso e programmate" },
   template: { title: "Template salvati", subtitle: "Gestisci i template di comunicazione riutilizzabili" },
   segmenti: { title: "Segmenti audience", subtitle: "Visualizza e gestisci i segmenti di destinatari" },
   statistiche: { title: "Statistiche", subtitle: "Analisi delle performance delle comunicazioni inviate" },
   impostazioni: { title: "Impostazioni", subtitle: "Configura le preferenze dell'operatore e del sistema" },
-  recenti: { title: "Comunicazioni recenti", subtitle: "Storico delle ultime comunicazioni inviate" },
+  recenti: { title: "Storico", subtitle: "Storico delle ultime comunicazioni inviate" },
 };
 
 const Index = () => {

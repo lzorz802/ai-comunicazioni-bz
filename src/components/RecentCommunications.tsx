@@ -10,7 +10,7 @@ const recentData = [
 const RecentCommunications = () => {
   return (
     <div className="bg-card border border-border rounded-lg p-6">
-      <h2 className="text-lg font-bold text-foreground mb-4">Comunicazioni recenti</h2>
+      <h2 className="text-lg font-bold text-foreground mb-4">Storico</h2>
       <Table>
         <TableHeader>
           <TableRow>

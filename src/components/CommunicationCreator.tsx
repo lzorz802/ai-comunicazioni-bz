@@ -4,13 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Calendar, Send, Edit3, Save, BarChart3, Mail, Smartphone, MessageSquare, Users, Eye } from "lucide-react";
+import { Calendar, Send, Edit3, Save, BarChart3, Mail, Smartphone, MessageSquare, Users, Eye, Sparkles, PlusCircle } from "lucide-react";
 import CommunicationSummary from "@/components/CommunicationSummary";
+import { Badge } from "@/components/ui/badge";
 
-const defaultSegments = [
-  { label: "Agenzie immobiliari e operatori settore immobiliare", count: 247, selected: true },
-  { label: "Utenti servizi acquisto immobili", count: 1342, selected: true },
-  { label: 'Interesse "Costruire, abitare e territorio"', count: 5891, selected: true },
+interface Segment {
+  label: string;
+  count: number;
+  selected: boolean;
+  aiSuggested: boolean;
+}
+
+const allSegments: Segment[] = [
+  { label: "Agenzie immobiliari", count: 247, selected: true, aiSuggested: true },
+  { label: "Utenti servizi acquisto immobili", count: 1342, selected: true, aiSuggested: true },
+  { label: 'Interesse "Costruire, abitare e territorio"', count: 5891, selected: true, aiSuggested: true },
+  { label: "Genitori con figli in età scolare", count: 8320, selected: false, aiSuggested: false },
+  { label: "Operatori sanitari registrati", count: 2100, selected: false, aiSuggested: false },
+  { label: "Residenti Bolzano città", count: 15000, selected: false, aiSuggested: false },
 ];
 
 const defaultPreview = {
@@ -33,7 +44,7 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
   const [userPrompt, setUserPrompt] = useState(
     "Vorrei impostare una comunicazione per tutte le persone potenzialmente interessate al nuovo servizio disponibile 'Acquisto di beni immobiliari provinciali'"
   );
-  const [segments, setSegments] = useState(defaultSegments);
+  const [segments, setSegments] = useState<Segment[]>(allSegments);
   const [onlyBolzano, setOnlyBolzano] = useState(false);
   const [excludeSimilar, setExcludeSimilar] = useState(false);
   const [sendDate, setSendDate] = useState("2026-03-10");
@@ -42,10 +53,11 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
   const [previewBody, setPreviewBody] = useState(defaultPreview.body);
   const [step, setStep] = useState(1);
   const [sent, setSent] = useState(false);
+  const [showNewSegment, setShowNewSegment] = useState(false);
+  const [newSegmentPrompt, setNewSegmentPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const totalRecipients = segments.filter(s => s.selected).reduce((sum, s) => sum + s.count, 0);
-
-  const channelLabel = channel === "email" ? "Email" : channel === "push" ? "Push" : "SMS";
 
   const handleTypeSelect = (val: string) => {
     setCommType(val);
@@ -66,6 +78,25 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
     setStep(1);
     setCommType("");
     onScrollTop?.();
+  };
+
+  const handleCreateSegment = () => {
+    if (!newSegmentPrompt.trim()) return;
+    setIsGenerating(true);
+    // Simulate AI generation
+    setTimeout(() => {
+      const newCount = Math.floor(Math.random() * 3000) + 500;
+      const newSeg: Segment = {
+        label: `Cittadini interessati: ${newSegmentPrompt.slice(0, 60)}`,
+        count: newCount,
+        selected: true,
+        aiSuggested: false,
+      };
+      setSegments(prev => [...prev, newSeg]);
+      setNewSegmentPrompt("");
+      setShowNewSegment(false);
+      setIsGenerating(false);
+    }, 1200);
   };
 
   if (sent) {
@@ -135,12 +166,45 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
                   }}
                 />
                 <span className="flex-1 text-sm font-medium text-foreground">{seg.label}</span>
+                {seg.aiSuggested && (
+                  <Badge variant="outline" className="text-ai border-ai/30 bg-ai/5 gap-1 text-xs">
+                    <Sparkles className="h-3 w-3" /> AI
+                  </Badge>
+                )}
                 <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
                   n° {seg.count.toLocaleString("it-IT")}
                 </span>
               </label>
             ))}
           </div>
+
+          {/* Create new segment */}
+          {!showNewSegment ? (
+            <Button variant="outline" className="mt-4 gap-2" onClick={() => setShowNewSegment(true)}>
+              <PlusCircle className="h-4 w-4" />
+              Crea nuovo segmento con supporto AI
+            </Button>
+          ) : (
+            <div className="mt-4 p-4 rounded-md border border-border bg-muted/30 space-y-3">
+              <label className="text-sm font-medium text-foreground block">Descrivi il segmento da creare</label>
+              <Textarea
+                value={newSegmentPrompt}
+                onChange={(e) => setNewSegmentPrompt(e.target.value)}
+                placeholder="Es: Cittadini interessati all'acquisto di beni immobiliari provinciali..."
+                className="min-h-[80px]"
+              />
+              <div className="flex gap-2">
+                <Button variant="cta" onClick={handleCreateSegment} disabled={!newSegmentPrompt.trim() || isGenerating}>
+                  <Sparkles className="h-4 w-4" />
+                  {isGenerating ? "Generazione..." : "Genera segmento"}
+                </Button>
+                <Button variant="ghost" onClick={() => { setShowNewSegment(false); setNewSegmentPrompt(""); }}>
+                  Annulla
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="mt-4 p-3 rounded-md bg-info-bg border border-info/20 flex items-center gap-2">
             <Users className="h-5 w-5 text-info" />
             <span className="text-sm font-semibold text-foreground">

@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CalendarClock } from "lucide-react";
 
 const data = [
   { nome: "Promozione servizio iscrizione scolastica", stato: "In corso", destinatari: "8.320", invio: "03/03/2026", canale: "Email" },
@@ -20,6 +22,7 @@ const ActiveCommunications = () => (
             <TableHead>Destinatari</TableHead>
             <TableHead>Data invio</TableHead>
             <TableHead>Canale</TableHead>
+            <TableHead className="text-right">Azioni</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -34,6 +37,12 @@ const ActiveCommunications = () => (
               <TableCell>{row.destinatari}</TableCell>
               <TableCell>{row.invio}</TableCell>
               <TableCell>{row.canale}</TableCell>
+              <TableCell className="text-right">
+                <Button variant="destructive" size="sm" className="gap-1.5">
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  Riprogramma
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
