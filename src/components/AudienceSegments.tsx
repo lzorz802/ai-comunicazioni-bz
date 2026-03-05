@@ -26,14 +26,8 @@ const AudienceSegments = () => {
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("newAudienceSegments") || "[]") as AudienceSegment[];
-    const twentyFourHours = 24 * 60 * 60 * 1000;
-    const now = Date.now();
-    const valid = stored.map(s => ({
-      ...s,
-      isNew: s.createdAt ? (now - s.createdAt) < twentyFourHours : false,
-    }));
-    if (valid.length > 0) {
-      setAllSegments([...valid, ...defaultSegments]);
+    if (stored.length > 0) {
+      setAllSegments([...stored, ...defaultSegments]);
     }
   }, []);
 
@@ -59,16 +53,7 @@ const AudienceSegments = () => {
           <TableBody>
             {allSegments.map((s, i) => (
               <TableRow key={i}>
-                <TableCell className="font-medium">
-                  <span className="flex items-center gap-2">
-                    {s.nome}
-                    {s.isNew && (
-                      <Badge variant="default" className="text-xs bg-accent text-accent-foreground">
-                        ✨ Nuovo
-                      </Badge>
-                    )}
-                  </span>
-                </TableCell>
+                <TableCell className="font-medium">{s.nome}</TableCell>
                 <TableCell>{s.utenti}</TableCell>
                 <TableCell><Badge variant="secondary">{s.categoria}</Badge></TableCell>
                 <TableCell>{s.aggiornato}</TableCell>
