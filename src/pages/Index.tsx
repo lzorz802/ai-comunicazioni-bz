@@ -11,6 +11,14 @@ import StatisticsPage from "@/components/StatisticsPage";
 import SettingsPage from "@/components/SettingsPage";
 import AiAssistantPanel from "@/components/AiAssistantPanel";
 
+interface SegmentRow {
+  nome: string;
+  utenti: string;
+  categoria: string;
+  aggiornato: string;
+  isNew?: boolean;
+}
+
 const sectionTitles: Record<string, { title: string; subtitle: string }> = {
   nuova: { title: "Nuova comunicazione", subtitle: "Crea e invia comunicazioni automatizzate con supporto dell'Intelligenza Artificiale" },
   attive: { title: "Comunicazioni attive", subtitle: "Monitora lo stato delle comunicazioni in corso e programmate" },
@@ -23,12 +31,17 @@ const sectionTitles: Record<string, { title: string; subtitle: string }> = {
 
 const Index = () => {
   const [activeItem, setActiveItem] = useState("nuova");
+  const [extraSegments, setExtraSegments] = useState<SegmentRow[]>([]);
   const mainRef = useRef<HTMLElement>(null);
   const section = sectionTitles[activeItem] || sectionTitles.nuova;
 
   const handleItemClick = (item: string) => {
     setActiveItem(item);
     mainRef.current?.scrollTo({ top: 0 });
+  };
+
+  const handleSegmentCreated = (seg: SegmentRow) => {
+    setExtraSegments(prev => [seg, ...prev]);
   };
 
   return (
@@ -38,17 +51,22 @@ const Index = () => {
         <OperatorSidebar activeItem={activeItem} onItemClick={handleItemClick} />
         <main ref={mainRef} className="flex-1 overflow-y-auto">
           <div className="p-6 min-h-[calc(100vh-200px)]">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-foreground">{section.title}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{section.subtitle}</p>
-          </div>
-          {activeItem === "nuova" && <CommunicationCreator onScrollTop={() => mainRef.current?.scrollTo({ top: 0 })} />}
-          {activeItem === "attive" && <ActiveCommunications />}
-          {activeItem === "template" && <SavedTemplates />}
-          {activeItem === "segmenti" && <AudienceSegments />}
-          {activeItem === "statistiche" && <StatisticsPage />}
-          {activeItem === "impostazioni" && <SettingsPage />}
-          {activeItem === "recenti" && <RecentCommunications />}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-foreground">{section.title}</h1>
+              <p className="text-sm text-muted-foreground mt-1">{section.subtitle}</p>
+            </div>
+            {activeItem === "nuova" && (
+              <CommunicationCreator
+                onScrollTop={() => mainRef.current?.scrollTo({ top: 0 })}
+                onSegmentCreated={handleSegmentCreated}
+              />
+            )}
+            {activeItem === "attive" && <ActiveCommunications />}
+            {activeItem === "template" && <SavedTemplates />}
+            {activeItem === "segmenti" && <AudienceSegments extraSegments={extraSegments} />}
+            {activeItem === "statistiche" && <StatisticsPage />}
+            {activeItem === "impostazioni" && <SettingsPage />}
+            {activeItem === "recenti" && <RecentCommunications />}
           </div>
           <AppFooter />
         </main>
