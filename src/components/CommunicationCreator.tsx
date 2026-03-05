@@ -15,6 +15,14 @@ interface Segment {
   aiSuggested: boolean;
 }
 
+interface SegmentRow {
+  nome: string;
+  utenti: string;
+  categoria: string;
+  aggiornato: string;
+  isNew?: boolean;
+}
+
 const allSegments: Segment[] = [
   { label: "Agenzie immobiliari", count: 247, selected: true, aiSuggested: true },
   { label: "Utenti servizi acquisto immobili", count: 1342, selected: true, aiSuggested: true },
@@ -31,15 +39,21 @@ const defaultPreview = {
 la Provincia mette a disposizione il nuovo servizio online per l'acquisto di beni immobiliari provinciali.
 
 👉 Chi può essere interessato:
-• Operatori immobiliari registrati
-• Utenti che hanno già utilizzato servizi simili
-• Persone con interesse per edilizia/territorio
+- Operatori immobiliari registrati
+- Utenti che hanno già utilizzato servizi simili
+- Persone con interesse per edilizia/territorio
 
 Cordiali saluti,
 Provincia Autonoma di Bolzano`,
 };
 
-const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => {
+const CommunicationCreator = ({
+  onScrollTop,
+  onSegmentCreated,
+}: {
+  onScrollTop?: () => void;
+  onSegmentCreated?: (seg: SegmentRow) => void;
+}) => {
   const [commType, setCommType] = useState("");
   const [userPrompt, setUserPrompt] = useState(
     "Vorrei impostare una comunicazione per tutte le persone potenzialmente interessate al nuovo servizio disponibile 'Acquisto di beni immobiliari provinciali'"
@@ -84,15 +98,15 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
   const handleOpenNewSegment = () => {
     setShowNewSegment(true);
     setCreatedSegment(null);
-    setNewSegmentPrompt(userPrompt || "Vorrei impostare una comunicazione per tutte le persone potenzialmente interessate al nuovo servizio disponibile 'Acquisto di beni immobiliari provinciali'");
+    setNewSegmentPrompt("Cittadini con ISEE sotto €15.000 che non hanno ancora richiesto il contributo affitto 2025");
   };
 
   const handleCreateSegment = () => {
     if (!newSegmentPrompt.trim()) return;
     setIsGenerating(true);
     setTimeout(() => {
-      const newCount = 2847;
-      const newLabel = "Cittadini interessati all'acquisto di beni immobiliari provinciali";
+      const newCount = 1243;
+      const newLabel = "Richiedenti potenziali contributo affitto 2025 (fascia ISEE bassa)";
       const newSeg: Segment = {
         label: newLabel,
         count: newCount,
@@ -107,6 +121,22 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
 
   const handleSelectCreatedSegment = () => {
     setSegments(prev => prev.map((s, i) => i === 0 ? { ...s, selected: true } : s));
+
+    if (createdSegment) {
+      const today = new Date().toLocaleDateString("it-IT", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      onSegmentCreated?.({
+        nome: createdSegment.label,
+        utenti: createdSegment.count.toLocaleString("it-IT"),
+        categoria: "AI Generato",
+        aggiornato: today,
+        isNew: true,
+      });
+    }
+
     setCreatedSegment(null);
     setShowNewSegment(false);
     setNewSegmentPrompt("");
@@ -206,9 +236,9 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
                 📋 "{createdSegment.label}"
               </p>
               <ul className="text-sm text-muted-foreground space-y-1 ml-1">
-                <li>• Persone che hanno visualizzato bandi immobiliari provinciali</li>
-                <li>• Utenti registrati ai servizi di alert immobiliari</li>
-                <li>• Cittadini con interessi registrati in "Casa e Territorio"</li>
+                <li>• Cittadini con ISEE certificato sotto la soglia €15.000</li>
+                <li>• Utenti che non risultano beneficiari del contributo affitto 2024</li>
+                <li>• Residenti in immobili in locazione con contratto registrato</li>
                 <li>• <span className="font-semibold text-foreground">Dimensione stimata: {createdSegment.count.toLocaleString("it-IT")} utenti</span></li>
               </ul>
               <p className="text-xs text-muted-foreground">
@@ -225,114 +255,5 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
               <Textarea
                 value={newSegmentPrompt}
                 onChange={(e) => setNewSegmentPrompt(e.target.value)}
-                placeholder="Es: Cittadini interessati all'acquisto di beni immobiliari provinciali..."
-                className="min-h-[80px]"
-              />
-              <div className="flex gap-2">
-                <Button variant="cta" onClick={handleCreateSegment} disabled={!newSegmentPrompt.trim() || isGenerating}>
-                  <Sparkles className="h-4 w-4" />
-                  {isGenerating ? "Generazione..." : "Genera segmento"}
-                </Button>
-                <Button variant="ghost" onClick={() => { setShowNewSegment(false); setNewSegmentPrompt(""); }}>
-                  Annulla
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-4 p-3 rounded-md bg-info-bg border border-info/20 flex items-center gap-2">
-            <Users className="h-5 w-5 text-info" />
-            <span className="text-sm font-semibold text-foreground">
-              Totale destinatari: {totalRecipients.toLocaleString("it-IT")} utenti
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Step 4: Personalizzazione */}
-      {step >= 3 && (
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-bold text-foreground mb-4">4. Personalizzazione</h2>
-          <div className="space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <Checkbox checked={onlyBolzano} onCheckedChange={(c) => setOnlyBolzano(!!c)} />
-              <span className="text-sm text-foreground">Includi solo utenti Provincia Bolzano</span>
-            </label>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <Checkbox checked={excludeSimilar} onCheckedChange={(c) => setExcludeSimilar(!!c)} />
-              <span className="text-sm text-foreground">Escludi chi ha già ricevuto comunicazione simile</span>
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">Data invio</label>
-                <Input type="date" value={sendDate} onChange={(e) => setSendDate(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">Canale</label>
-                <Select value={channel} onValueChange={setChannel}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="email">
-                      <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> Email</span>
-                    </SelectItem>
-                    <SelectItem value="push">
-                      <span className="flex items-center gap-2"><Smartphone className="h-4 w-4" /> Push</span>
-                    </SelectItem>
-                    <SelectItem value="sms">
-                      <span className="flex items-center gap-2"><MessageSquare className="h-4 w-4" /> SMS</span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Step 5: Preview */}
-      {step >= 3 && (
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            5. Anteprima comunicazione
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-1.5">Oggetto</label>
-              <Input value={previewSubject} onChange={(e) => setPreviewSubject(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-1.5">Corpo del messaggio</label>
-              <Textarea
-                value={previewBody}
-                onChange={(e) => setPreviewBody(e.target.value)}
-                className="min-h-[200px] font-mono text-sm"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground italic">Testo generato automaticamente dall'AI e modificabile</p>
-            <div className="flex items-center gap-2 mt-2">
-              <Button variant="cta" className="gap-2" size="lg" onClick={handleSend}>
-                <Send className="h-4 w-4" /> INVIA COMUNICAZIONE
-              </Button>
-              <Button variant="cta-outline" className="gap-2">
-                <Edit3 className="h-4 w-4" /> MODIFICA SEGMENTI
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" className="gap-2">
-                <Save className="h-4 w-4" /> SALVA COME TEMPLATE
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <BarChart3 className="h-4 w-4" /> ANTEPRIMA STATISTICHE
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default CommunicationCreator;
+                placeholder="Es: Cittadini con ISEE sotto €15.000 che non hanno ancora richiesto il contributo affitto 2025..."
+                cla
