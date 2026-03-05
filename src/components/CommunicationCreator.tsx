@@ -131,7 +131,7 @@ const CommunicationCreator = ({
       onSegmentCreated?.({
         nome: createdSegment.label,
         utenti: createdSegment.count.toLocaleString("it-IT"),
-        categoria: "AI Generato",
+        categoria: "Cittadini",
         aggiornato: today,
         isNew: true,
       });
