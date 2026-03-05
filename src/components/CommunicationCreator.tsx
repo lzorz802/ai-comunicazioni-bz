@@ -102,11 +102,6 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
       setSegments(prev => [newSeg, ...prev]);
       setIsGenerating(false);
       setCreatedSegment({ label: newLabel, count: newCount });
-
-      // Persist to localStorage for AudienceSegments
-      const stored = JSON.parse(localStorage.getItem("newAudienceSegments") || "[]");
-      stored.unshift({ nome: newLabel, utenti: newCount.toLocaleString("it-IT"), categoria: "Cittadini", aggiornato: new Date().toLocaleDateString("it-IT"), createdAt: Date.now() });
-      localStorage.setItem("newAudienceSegments", JSON.stringify(stored));
     }, 1200);
   };
 
