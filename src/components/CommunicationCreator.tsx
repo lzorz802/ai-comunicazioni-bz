@@ -56,6 +56,7 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
   const [showNewSegment, setShowNewSegment] = useState(false);
   const [newSegmentPrompt, setNewSegmentPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [createdSegment, setCreatedSegment] = useState<{ label: string; count: number } | null>(null);
 
   const totalRecipients = segments.filter(s => s.selected).reduce((sum, s) => sum + s.count, 0);
 
@@ -80,23 +81,40 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
     onScrollTop?.();
   };
 
+  const handleOpenNewSegment = () => {
+    setShowNewSegment(true);
+    setCreatedSegment(null);
+    setNewSegmentPrompt(userPrompt || "Vorrei impostare una comunicazione per tutte le persone potenzialmente interessate al nuovo servizio disponibile 'Acquisto di beni immobiliari provinciali'");
+  };
+
   const handleCreateSegment = () => {
     if (!newSegmentPrompt.trim()) return;
     setIsGenerating(true);
-    // Simulate AI generation
     setTimeout(() => {
-      const newCount = Math.floor(Math.random() * 3000) + 500;
+      const newCount = 2847;
+      const newLabel = "Cittadini interessati all'acquisto di beni immobiliari provinciali";
       const newSeg: Segment = {
-        label: `Cittadini interessati: ${newSegmentPrompt.slice(0, 60)}`,
+        label: newLabel,
         count: newCount,
-        selected: true,
+        selected: false,
         aiSuggested: false,
       };
-      setSegments(prev => [...prev, newSeg]);
-      setNewSegmentPrompt("");
-      setShowNewSegment(false);
+      setSegments(prev => [newSeg, ...prev]);
       setIsGenerating(false);
+      setCreatedSegment({ label: newLabel, count: newCount });
+
+      // Persist to localStorage for AudienceSegments
+      const stored = JSON.parse(localStorage.getItem("newAudienceSegments") || "[]");
+      stored.unshift({ nome: newLabel, utenti: newCount.toLocaleString("it-IT"), categoria: "AI", aggiornato: new Date().toLocaleDateString("it-IT"), isNew: true, createdAt: Date.now() });
+      localStorage.setItem("newAudienceSegments", JSON.stringify(stored));
     }, 1200);
+  };
+
+  const handleSelectCreatedSegment = () => {
+    setSegments(prev => prev.map((s, i) => i === 0 ? { ...s, selected: true } : s));
+    setCreatedSegment(null);
+    setShowNewSegment(false);
+    setNewSegmentPrompt("");
   };
 
   if (sent) {
@@ -180,10 +198,32 @@ const CommunicationCreator = ({ onScrollTop }: { onScrollTop?: () => void }) => 
 
           {/* Create new segment */}
           {!showNewSegment ? (
-            <Button variant="outline" className="mt-4 gap-2" onClick={() => setShowNewSegment(true)}>
+            <Button variant="outline" className="mt-4 gap-2" onClick={handleOpenNewSegment}>
               <PlusCircle className="h-4 w-4" />
               Crea nuovo segmento con supporto AI
             </Button>
+          ) : createdSegment ? (
+            <div className="mt-4 p-5 rounded-lg border-2 border-green-500/30 bg-green-50/50 dark:bg-green-950/20 space-y-3">
+              <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                ✅ Nuovo segmento creato con successo!
+              </p>
+              <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                📋 "{createdSegment.label}"
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-1">
+                <li>• Persone che hanno visualizzato bandi immobiliari provinciali</li>
+                <li>• Utenti registrati ai servizi di alert immobiliari</li>
+                <li>• Cittadini con interessi registrati in "Casa e Territorio"</li>
+                <li>• <span className="font-semibold text-foreground">Dimensione stimata: {createdSegment.count.toLocaleString("it-IT")} utenti</span></li>
+              </ul>
+              <p className="text-xs text-muted-foreground">
+                🔧 <strong>Per modificare il segmento:</strong> vai su <strong>"Segmenti audience"</strong> (lo trovi in cima alla lista)
+              </p>
+              <Button variant="cta" className="gap-2 mt-1" onClick={handleSelectCreatedSegment}>
+                <Sparkles className="h-4 w-4" />
+                Seleziona questo segmento per la tua comunicazione
+              </Button>
+            </div>
           ) : (
             <div className="mt-4 p-4 rounded-md border border-border bg-muted/30 space-y-3">
               <label className="text-sm font-medium text-foreground block">Descrivi il segmento da creare</label>
